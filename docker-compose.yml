@@ -1,0 +1,64 @@
+version: '3.5'
+
+x-common-variables: &env
+  _JAVA_OPTIONS: -Xmx512m -Xms256m
+  SPRING_PROFILES_ACTIVE: ${PROFILES:-default}
+  SPRING_CONFIG_IMPORT: configserver:http://${CONFIG_SERVER_USERNAME:-isc}:${CONFIG_SERVER_PASSWORD:-4RKsJQfuvvuG}@config:8888/
+
+services:
+  server :
+    image: ${DOCKER_REPOSITORY}/isc/core:latest
+    networks:
+      - service
+      - backend
+      - monitoring
+    environment: *env
+    healthcheck:
+      test: busybox wget -qO - http://localhost:8081/actuator/health | grep "UP" || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+       mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql
+    networks:
+      - service
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=core
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 3308:3306
+    healthcheck:
+      test: ["CMD", 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$MYSQL_ROOT_PASSWORD' ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+# Volumes
+volumes:
+  mysql: {}
+  # elasticsearch-data:
+  #   driver: local
+
+
+networks:
+#  default:
+  backend:
+    external:
+      name: isc_backend
+  service:
+#    external:
+      name: isc_backend_core
+  monitoring:
+    external:
+      name: isc_monitoring
+
+#docker-compose up
+#docker-compose down (stop all the app)
+#docker exec -ti nameContainer /bin/bash
+#docker-compose down --remove-orphans -v (cut off every image, container and volume)

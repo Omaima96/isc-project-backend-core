@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: core
+    #description:
+    version: @project.version@
+  config:
+    import: ${SPRING_CONFIG_IMPORT:configserver:http://isc:4RKsJQfuvvuG@localhost:8888/}

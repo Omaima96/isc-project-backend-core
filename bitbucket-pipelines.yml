@@ -1,0 +1,35 @@
+definitions:
+  services:
+    docker:
+      memory: 2048
+  steps:
+    - step: &build-push
+        name: Build and Push Image
+        image: maven
+        services:
+          - docker
+        caches:
+          - maven
+        script:
+          - mvn -DDOCKER_GOAL=build -DDOCKER_REPOSITORY=$DOCKER_REPOSITORY -DDOCKER_USERNAME=$DOCKER_USERNAME -DDOCKER_PASSWORD=$DOCKER_PASSWORD clean verify package -U
+    - step: &deploy
+        name: Deploy to Server
+        services:
+          - docker
+        image: atlassian/default-image:3
+        script: { }
+
+pipelines:
+  branches:
+    test:
+      - step: *build-push
+      - step:
+          <<: *deploy
+          deployment: test
+          script:
+            - docker login $DOCKER_REPOSITORY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            - docker-compose -H ssh://$REMOTE_SERVER pull
+            - LOGSTASH_CONFIG=/opt/atlassian/pipelines/agent/build/logstash.conf:ro PROFILES=$PROFILES docker-compose -H ssh://$REMOTE_SERVER -p "isc" up -d
+  tags:
+    v*:
+      - step: *build-push

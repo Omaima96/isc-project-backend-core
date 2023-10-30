@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <CustomLevels>
+        <CustomLevel name="AUDIT" intLevel="401"/>
+    </CustomLevels>
+    <Appenders>
+        <RollingFile name="auditout" fileName="../logs/core//core_audit.log"
+                     filePattern="../logs/core//core_audit-%i.log" append="true">
+            <LevelRangeFilter minLevel="AUDIT" maxLevel="AUDIT" onMatch="ACCEPT"/>
+            <PatternLayout
+                    pattern="[%d{ISO8601}] [CNT] [%X{uuid}] [%X{methodName}] [%X{startTimestamp}] [%X{user}] [%X{chiamante}] %X{startEndTag} %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="25MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10" fileIndex="min"/>
+        </RollingFile>
+        <RollingFile name="errorout" fileName="../logs/core//core_error.log"
+                     filePattern="../logs/core//core_error-%i.log">
+            <PatternLayout
+                    pattern="[%d{ISO8601}] [CNT] [%X{uuid}] [%X{methodName}] [%X{startTimestamp}] [%X{user}] [%X{chiamante}] %X{startEndTag} %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="25MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10" fileIndex="min"/>
+        </RollingFile>
+        <RollingFile name="infoout" fileName="../logs/core//core.log"
+                     filePattern="../logs/core//core-%i.log">
+            <LevelRangeFilter minLevel="ERROR" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout
+                    pattern="[%d{ISO8601}][%-5p][CNT][%t][%X{userID}][%X{startTimestamp}][%X{methodName}][%X{canaleAcquisizione}] - %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10" fileIndex="min"/>
+        </RollingFile>
+        <Console name="stdout">
+            <PatternLayout pattern="[%d{ISO8601}][%-4p][CNT][%t][%X{startTimestamp}][%X{methodName}] - %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger level="AUDIT" name="core_audit" additivity="false">
+            <AppenderRef ref="auditout"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="stdout"/>
+            <AppenderRef ref="infoout"/>
+            <AppenderRef ref="auditout"/>
+            <AppenderRef ref="errorout" level="ERROR"/>
+        </Root>
+    </Loggers>
+</Configuration>
