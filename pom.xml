@@ -17,7 +17,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
-		<jib.base.image>openjdk:17-alpine</jib.base.image>
+		<jib.base.image>openjdk:17-oracle</jib.base.image>
 		<DOCKER_GOAL>dockerBuild</DOCKER_GOAL>
 		<DOCKER_REPOSITORY>${project.artifactId}</DOCKER_REPOSITORY>
 	</properties>
@@ -123,6 +123,7 @@
 			<artifactId>spring-boot-autoconfigure</artifactId>
 			<version>3.0.2</version>
 		</dependency>
+
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
